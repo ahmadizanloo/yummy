@@ -16,7 +16,7 @@ else:
 def get_recipe_from_image(image):
     try:
         # Convert the image to bytes
-        image_bytes = io.BytesIO(image.read())
+        image_bytes = image.read()
         encoded_image = "data:image/png;base64," + base64.b64encode(image_bytes).decode()
 
         # Send the image and prompt to GPT
