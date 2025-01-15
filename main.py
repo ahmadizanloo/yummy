@@ -1,51 +1,56 @@
 import streamlit as st
 from openai import OpenAI
+import io
 import os
-st.title("snapcook")
-st.image("yummy.jpg")
-st.markdown('''
-<h3>"Hey, what you have in the kitchen?"</h3>
-''', unsafe_allow_html=True)  # HTML content for better formatting
-#api_key = os.getenv("OPENAI_API_KEY")  # Fetch the API key from environment variables
-#if api_key:
- #   openai_client = OpenAI(api_key=api_key)  # Initialize the OpenAI client
-#else:
+
+# Initialize OpenAI client (replace YOUR_API_KEY with your OpenAI API key)
+api_key = os.getenv("OPENAI_API_KEY")  # Fetch the API key from environment variables
+
+if api_key:
+    openai_client = OpenAI(api_key=api_key)  # Initialize the OpenAI client
+else:
     # Raise an error if the API key is not set in the environment variables
- #   raise ValueError("OPENAI_API_KEY is not set in environment variables!")
-SYSTEM_PROMPT = """
-"""
+    raise ValueError("OPENAI_API_KEY is not set in environment variables!")
+# Function to send the image to GPT and get a response
+def get_recipe_from_image(image):
+    try:
+        # Convert the image to bytes
+        image_bytes = io.BytesIO(image.read()).getvalue()
+        encoded_image = "data:image/png;base64," + st.base64.b64encode(image_bytes).decode()
 
-if "user_history" not in st.session_state:
-    st.session_state.user_history = [{"role": "system", "content": SYSTEM_PROMPT}]
-def process_image(image):
-    # Handle the image processing here
-    if image:
-        st.image(image, caption="Here’s your uploaded mystery!", use_column_width=True)
-        st.write("Processing your kitchen chaos...")
-        # Call your AI model or processing function here
-        # Example: result = process_kitchen_image(image)
-        # st.write(f"Recipe suggestion: {result}")
+        # Send the image and prompt to GPT
+        response = openai_client.ChatCompletion.create(
+            model="gpt-4o-mini",  # Use the appropriate model
+            messages=[
+                {"role": "user", "content": [
+                    {"type": "text", "text": "What can I cook with the ingredients in this image?"},
+                    {"type": "image", "image_url": {"url": encoded_image}}
+                ]}
+            ],
+            max_tokens=300
+        )
+        
+        # Extract and return the response
+        recommendation = response.choices[0].message["content"]["text"]
+        return recommendation
+    except Exception as e:
+        st.error(f"Error calling GPT API: {str(e)}")
+        return None
 
-st.title("What’s in Your Kitchen?")
-st.caption("Upload your kitchen mystery and we’ll solve it deliciously!")
+# Streamlit App UI
+st.title("SnapCook")
+st.caption("Upload your kitchen mystery, and we’ll solve it deliciously!")
 
-# Camera input
-camera_image = st.camera_input("Take a photo of your ingredients!")
+# Image Input
+uploaded_image = st.file_uploader("Upload a photo of your ingredients!", type=["jpg", "jpeg", "png"])
 
 # Button to start processing
-if st.button("Start the Recipe Magic!"):
-    if camera_image:
-        process_image(camera_image)
+if st.button("Find a Recipe"):
+    if uploaded_image:
+        # Call the GPT API with the image
+        recommendation = get_recipe_from_image(uploaded_image)
+        if recommendation:
+            st.write("### Here's what you can cook:")
+            st.write(recommendation)
     else:
-        st.warning("Please take a photo first!")
-
-
-
-
-
-
-
-
-
-
-
+        st.warning("Please upload a photo first!")
