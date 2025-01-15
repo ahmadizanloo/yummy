@@ -37,7 +37,7 @@ if st.button("Find a Recipe"):
                            
 
             # Extract and display the recipe
-            recipe = response.choices[0].message["content"]["text"]
+            recipe = response.choices[0].message.content
             st.write("### Here's what you can cook:")
             st.write(recipe)
 
