@@ -20,7 +20,7 @@ def get_recipe_from_image(image):
         encoded_image = "data:image/png;base64," + base64.b64encode(image_bytes).decode()
 
         # Send the image and prompt to GPT
-        response = openai_client.ChatCompletion.create(
+        response = openai_client.chat.completions.create(
             model="gpt-4o-mini",  # Use the appropriate model
             messages=[
                 {"role": "user", "content": [
