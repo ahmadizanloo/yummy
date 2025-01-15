@@ -24,10 +24,7 @@ def get_recipe_from_image(image):
             model="gpt-4o-mini",  # Use the appropriate model
            messages=[
                 {"role": "user", "content": "What can I cook with the ingredients in this image?"}
-            ],
-            files={"file": ("image.png", image_bytes, "image/png")},
-            max_tokens=300
-        )
+            ])
         
         # Extract and return the response
         recommendation = response.choices[0].message["content"]["text"]
