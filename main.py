@@ -32,23 +32,9 @@ if st.button("Find a Recipe"):
 
             # Send the image to GPT API
             response = openai_client.chat.completions.create(
-                model="gpt-4o-mini",  # Replace with your model
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": "What can I cook with the ingredients in this image?",
-                            },
-                            {
-                                "type": "image_url",
-                                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
-                            },
-                        ],
-                    }
-                ],
-            )
+                messages= [{"role": "system", "content": "what can I cook with these?!"}, {"role": "user", "content": f"data:image/jpeg;base64,{base64_image}"}],
+                model="gpt-4o-mini")# Replace with your model            
+                           
 
             # Extract and display the recipe
             recipe = response.choices[0].message["content"]["text"]
