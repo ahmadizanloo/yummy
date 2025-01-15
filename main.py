@@ -2,6 +2,7 @@ import streamlit as st
 from openai import OpenAI
 import io
 import os
+import base64
 
 # Initialize OpenAI client (replace YOUR_API_KEY with your OpenAI API key)
 api_key = os.getenv("OPENAI_API_KEY")  # Fetch the API key from environment variables
@@ -16,7 +17,7 @@ def get_recipe_from_image(image):
     try:
         # Convert the image to bytes
         image_bytes = io.BytesIO(image.read()).getvalue()
-        encoded_image = "data:image/png;base64," + st.base64.b64encode(image_bytes).decode()
+        encoded_image = "data:image/png;base64," + base64.b64encode(image_bytes).decode()
 
         # Send the image and prompt to GPT
         response = openai_client.ChatCompletion.create(
