@@ -12,26 +12,9 @@ if api_key:
 else:
     # Raise an error if the API key is not set in the environment variables
     raise ValueError("OPENAI_API_KEY is not set in environment variables!")
-# Function to send the image to GPT and get a response
-def get_recipe_from_image(image):
-    try:
-        # Convert the image to bytes
-        image_bytes = image.read()
-        encoded_image = "data:image/png;base64," + base64.b64encode(image_bytes).decode()
-
-        # Send the image and prompt to GPT
-        response = openai_client.chat.completions.create(
-            model="gpt-4o-mini",  # Use the appropriate model
-           messages=[
-                {"role": "user", "content": "What can I cook with the ingredients in this image?"}
-            ])
-        
-        # Extract and return the response
-        recommendation = response.choices[0].message["content"]["text"]
-        return recommendation
-    except Exception as e:
-        st.error(f"Error calling GPT API: {str(e)}")
-        return None
+# Function to encode the image into base64
+def encode_image(uploaded_image):
+    return base64.b64encode(uploaded_image.read()).decode("utf-8")
 
 # Streamlit App UI
 st.title("SnapCook")
@@ -43,10 +26,36 @@ uploaded_image = st.file_uploader("Upload a photo of your ingredients!", type=["
 # Button to start processing
 if st.button("Find a Recipe"):
     if uploaded_image:
-        # Call the GPT API with the image
-        recommendation = get_recipe_from_image(uploaded_image)
-        if recommendation:
+        try:
+            # Encode the uploaded image into base64
+            base64_image = encode_image(uploaded_image)
+
+            # Send the image to GPT API
+            response = openai_client.chat.completions.create(
+                model="gpt-4o-mini",  # Replace with your model
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "What can I cook with the ingredients in this image?",
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
+                            },
+                        ],
+                    }
+                ],
+            )
+
+            # Extract and display the recipe
+            recipe = response.choices[0].message["content"]["text"]
             st.write("### Here's what you can cook:")
-            st.write(recommendation)
+            st.write(recipe)
+
+        except Exception as e:
+            st.error(f"Error calling GPT API: {str(e)}")
     else:
         st.warning("Please upload a photo first!")
