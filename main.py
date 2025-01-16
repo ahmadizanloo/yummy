@@ -11,7 +11,8 @@ else:
     raise ValueError("OPENAI_API_KEY is not set in environment variables!")
 # Set your OpenAI API key
 # Title of the app
-st.title("Analyze Your Picture with GPT-4 Vision")
+st.image("yummy.jpg")
+st.title("Capture, Click, Cook!")
 
 # Step 1: Capture the image using Streamlit
 photo = st.camera_input("Take a picture with your camera:")
@@ -43,7 +44,7 @@ if photo is not None:
                             },
                         ],
                     }, 
-                    {"role": "system", "content": "you are a cook. you are a cool chef!:) you can first very good recognize the ingredients in the picture, then you can make a super good and simple idea what to cook with these ingredients"}
+                    {"role": "system", "content": "you are a cook. you are a cool chef!:) you can first very good recognize the ingredients in the picture, then you can make a super good and simple idea what to cook with these ingredients."}
                 ],
                 max_tokens=300,
             )
