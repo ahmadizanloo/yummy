@@ -1,10 +1,7 @@
 import streamlit as st
-from openai import OpenAI
-import io
-import os
 import base64
-
-# Initialize OpenAI client (replace YOUR_API_KEY with your OpenAI API key)
+from openai import OpenAI
+import os
 api_key = os.getenv("OPENAI_API_KEY")  # Fetch the API key from environment variables
 
 if api_key:
@@ -12,36 +9,50 @@ if api_key:
 else:
     # Raise an error if the API key is not set in the environment variables
     raise ValueError("OPENAI_API_KEY is not set in environment variables!")
-# Function to encode the image into base64
-def encode_image(uploaded_image):
-    return base64.b64encode(uploaded_image.read()).decode("utf-8")
+# Set your OpenAI API key
+# Title of the app
+st.title("Analyze Your Picture with GPT-4 Vision")
 
-# Streamlit App UI
-st.title("SnapCook")
-st.caption("Upload your kitchen mystery, and we’ll solve it deliciously!")
+# Step 1: Capture the image using Streamlit
+photo = st.camera_input("Take a picture with your camera:")
 
-# Image Input
-uploaded_image = st.file_uploader("Upload a photo of your ingredients!", type=["jpg", "jpeg", "png"])
+if photo is not None:
+    # Display the captured photo
+    st.image(photo, caption="Captured Photo", use_container_width=True)
 
-# Button to start processing
-if st.button("Find a Recipe"):
-    if uploaded_image:
+    # Step 2: Encode the image in base64 format
+    def encode_image_to_base64(image_file):
+        return base64.b64encode(image_file.read()).decode("utf-8")
+
+    base64_image = encode_image_to_base64(photo)
+
+    # Step 3: Send the base64 encoded image to the OpenAI API
+    with st.spinner("Analyzing the image..."):
         try:
-            # Encode the uploaded image into base64
-            base64_image = encode_image(uploaded_image)
-
-            # Send the image to GPT API
+            # Call OpenAI API with the image
             response = openai_client.chat.completions.create(
-                messages= [{"role": "system", "content": "what can I cook with these?!"}, {"role": "user", "content": f"data:image/jpeg;base64,{base64_image}"}],
-                model="gpt-4o-mini")# Replace with your model            
-                           
+                model="gpt-4o-mini",  # Replace with the appropriate GPT-4 Vision model
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": "what can i cook with these ingredient?"},
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
+                            },
+                        ],
+                    }, 
+                    {"role": "system", "content": "you are a cook. you are a cool chef!:) you can first very good recognize the ingredients in the picture, then you can make a super good and simple idea what to cook with these ingredients"}
+                ],
+                max_tokens=300,
+            )
 
-            # Extract and display the recipe
-            recipe = response.choices[0].message.content
-            st.write("### Here's what you can cook:")
-            st.write(recipe)
+            # Extract and display the model's response
+            assistant_message = response.choices[0].message.content
+            st.success("Image Analysis:")
+            st.write(assistant_message)
 
         except Exception as e:
-            st.error(f"Error calling GPT API: {str(e)}")
-    else:
-        st.warning("Please upload a photo first!")
+            # Handle any errors returned by the API
+            st.write ("some thing happend!")
