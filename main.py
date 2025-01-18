@@ -11,7 +11,7 @@ else:
     raise ValueError("OPENAI_API_KEY is not set in environment variables!")
 # Set your OpenAI API key
 # Title of the app
-#st.image("yummy.jpg")
+st.image("cookfood.jpg")
 st.title("Capture, Click, Cook!")
 
 # Step 1: Capture the image using Streamlit
