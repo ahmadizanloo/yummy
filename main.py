@@ -44,7 +44,7 @@ if photo is not None:
                             },
                         ],
                     }, 
-                    {"role": "system", "content": "you are a cook. you are a cool chef!:) you can first very good recognize the ingredients in the picture, then you can make a super good and simple idea what to cook with these ingredients."}
+                    {"role": "system", "content": "du bist ein Koch. du bist ein cooler Koch!:) Du kannst die Zutaten auf dem Bild erst sehr gut erkennen, dann kannst du dir eine super gute und einfache Idee machen, was du mit diesen Zutaten kochen könntest."}
                 ],
                 max_tokens=300,
             )
